@@ -4,10 +4,10 @@ Version:	1.0.1
 Release:	1
 License:	GPL
 Group:		Applications/Games
-Source0:	ftp://chess.onenet.net/pub/chess/Unix/%{name}.tar.gz
+Source0:	http://kamp.pl/~havner/%{name}.tar.gz
 # Source0-md5:	9f3fe9a548d319d2328fc0c98c521096
 Source2:	Cheq.ps
-Source3:	ftp://www.freechess.org/pub/chess/Unix/ChessFont.sh.gz
+Source3:	http://kamp.pl/~havner/ChessFont.sh.gz
 # Source3-md5:	8a694f8059c0270f2a57cdbca1e7ef8a
 Patch0:		%{name}.diff
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
