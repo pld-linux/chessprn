@@ -1,4 +1,5 @@
-Summary:	Utility to print chess games in various formats.
+Summary:	Utility to print chess games in various formats
+Summary(pl):	Narzêdzie do drukowania rozgrywek szachowych w ró¿nych formatach
 Name:		chessprn
 Version:	1.0.1
 Release:	1
@@ -15,42 +16,42 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 Utility to print chess games in various formats.
 
+%description -l pl
+Narzêdzie do drukowania rozgrywek szachowych w ró¿nych formatach.
+
 %prep
 %setup -q -n chessprn
 %patch -p1
-zcat ${RPM_SOURCE_DIR}/ChessFont.sh.gz | unshar
+zcat %{SOURCE3} | unshar
 mv Font ChessFont.ps
 mv README README.ChessFont
 
 %build
 %{__make}
 
-%post
-texhash
-
-%postun
-texhash
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT/{%{_bindir},%{_prefix}/lib/games/chessprn/tex}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_prefix}/lib/games/chessprn/tex}
 install -d $RPM_BUILD_ROOT%{_datadir}/texmf/tex/latex/chessprn
-%{__make} LIBDIR=$RPM_BUILD_ROOT%{_prefix}/lib/games/chessprn \
-	BINDIR=$RPM_BUILD_ROOT%{_bindir} install
-cp ${RPM_SOURCE_DIR}/Cheq.ps $RPM_BUILD_ROOT%{_prefix}/lib/games/chessprn
+
+%{__make} install \
+	LIBDIR=$RPM_BUILD_ROOT%{_prefix}/lib/games/chessprn \
+	BINDIR=$RPM_BUILD_ROOT%{_bindir}
+
+install %{SOURCE2} $RPM_BUILD_ROOT%{_prefix}/lib/games/chessprn
 cp ChessFont.ps $RPM_BUILD_ROOT%{_prefix}/lib/games/chessprn/ChessFont.ps
 cp -a $RPM_BUILD_ROOT%{_prefix}/lib/games/chessprn/tex/* \
 	$RPM_BUILD_ROOT%{_datadir}/texmf/tex/latex/chessprn
 
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post	-p /usr/bin/texhash
+%postun	-p /usr/bin/texhash
+
 %files
 %defattr(644,root,root,755)
-%doc notation.doc
-%doc symboles.txt
-%doc readme
-%doc README.ChessFont Demo Table
-%attr(755,root,root) /usr/bin/chessprn
-/usr/lib/games/chessprn
+%doc notation.doc symboles.txt readme README.ChessFont Demo Table
+%attr(755,root,root) %{_libdir}/chessprn
+%{_prefix}/lib/games/chessprn
 /usr/share/texmf/tex/latex/chessprn
