@@ -1,0 +1,234 @@
+diff -u -r chessprn/changes chessprn.new/changes
+--- chessprn/changes	Tue Apr  6 07:48:38 1993
++++ chessprn.new/changes	Mon Aug  9 10:51:37 1999
+@@ -1,3 +1,7 @@
++** 8/6/99 - Updated for Linux Redhat 6.0
++	- ChessPrn 1.0.1 by Kayvan A. Sylvan
++	- Fixed @special output bug.
++
+ ** 04/01/93 - April Fools!
+         - ChessPrn 1.0 changed from Notation 4.7 by Henry Thomas
+         - Lots of changes (Break out the Raid. Lots of bugs killed.)
+diff -u -r chessprn/drivers.c chessprn.new/drivers.c
+--- chessprn/drivers.c	Tue Apr  6 07:48:48 1993
++++ chessprn.new/drivers.c	Mon Aug  9 10:51:37 1999
+@@ -683,7 +683,7 @@
+ {
+   char *outBuf;
+   int mallocErr=0,i;
+-  if((outBuf = (char *)malloc(sizeof(char)*strlen(string)))==NULL)
++  if((outBuf = (char *)malloc(sizeof(char)*(strlen(string) + 1)))==NULL)
+     { outBuf=string; mallocErr=1; }
+   else
+    { strcpy(outBuf,string);
+@@ -902,7 +902,7 @@
+   if (type != T_COMMENT)
+     (void) fprintf(dr->outfile, " \\nochess");
+ 
+-  if((outBuf = (char *)malloc(sizeof(char)*strlen(string)))==NULL)
++  if((outBuf = (char *)malloc(sizeof(char)*(strlen(string) + 1)))==NULL)
+     { outBuf=string; mallocErr=1; }
+   else
+    { strcpy(outBuf,string);
+@@ -1587,8 +1587,7 @@
+ 
+   tmp = (format *) malloc (sizeof(format));
+   ALLOCP(tmp);
+-  for (i=0; i < ((sizeof (format))/ sizeof (int)) ; i++)
+-    ((int *) tmp)[i] = 0;
++  memset(tmp, '\0', sizeof(format));
+   tmp->output_move_format = SHORTENED;
+   tmp->print_headers = TRUE;
+   tmp->outfile = stdout;
+@@ -1791,4 +1790,3 @@
+   dr->intrupt = FALSE;
+   dr->newline=FALSE;
+ }
+-
+\ No newline at end of file
+Only in chessprn: lexer.c
+diff -u -r chessprn/lexer.l chessprn.new/lexer.l
+--- chessprn/lexer.l	Tue Apr  6 07:49:13 1993
++++ chessprn.new/lexer.l	Mon Aug  9 10:51:37 1999
+@@ -6,6 +6,14 @@
+ %{
+ #include <stdio.h>
+ #include <string.h>
++#include "config.h"
++#include "chesstyp.h"
++#include "notation.h"
++#include "movedo.h"
++#include "movegen.h"
++#include "drivers.h"
++#include "lexer.h"
++extern format *dr;
+ /* Damn Borland */
+ #ifdef __TURBOC__
+ #define fileno(f)       ((f)->fd)
+@@ -65,6 +73,14 @@
+ "ep"|"e\.p\."           { /* comment */ ; parse_comment("ep"); }
+ 
+ \$[a-z][a-z][a-z]       { /* game comment */ ; parse_comment(yytext); }
++@special		{
++			int c;
++
++			while (((c = input()) != 0) && (c != '\n'))
++				(void) putc(c, dr->outfile);
++			(void) putc('\n', dr->outfile);
++			}
++
+ @[a-z]+\{		{ /* keyword with arg */
+                           yytext[yyleng -1] = '\0' ;
+                           parse_keyword(yytext, comment('}','{'));
+diff -u -r chessprn/makefile chessprn.new/makefile
+--- chessprn/makefile	Tue Apr  6 07:51:49 1993
++++ chessprn.new/makefile	Mon Aug  9 10:51:37 1999
+@@ -8,9 +8,9 @@
+ 		movegen.h movedo.h \
+ 		config.h chesstyp.h chesssym.def
+ 
+-LIBDIR = .
+-LIBTEX = .
+-BINDIR = .
++LIBDIR = /usr/lib/games/chessprn
++LIBTEX = $(LIBDIR)/tex
++BINDIR = /usr/bin
+ 
+ #LIBDIR     = $(HOME)/lib
+ #LIBTEX    = $(HOME)/lib/tex
+@@ -53,7 +53,7 @@
+ # to compile with TURBO C or ANSI C, define TURBOC
+ 
+ #For UNIX et al
+-CFLAGS     = -O2 \
++CFLAGS     = -g \
+        -DLIB_DIR=\"$(LIBDIR)/\" \
+        -DIN_LANG=ENGLISH \
+        -DOUT_LANG=ENGLISH
+@@ -71,7 +71,7 @@
+ DEL = rm -f
+ #DEL = del
+ 
+-CC= gcc -ansi -pedantic
++CC= gcc -pedantic
+ #CC = tcc +chessprn.cfg
+ 
+ ############################################################
+@@ -90,7 +90,7 @@
+ 	$(LEX) -t lexer.l > lexer.c
+ 
+ chessprn: $(OBJECTS)
+-	$(CC) $(CFLAGS) $(OUTNAME) $(OBJECTS)
++	$(CC) $(CFLAGS) $(OUTNAME) $(OBJECTS) -lfl
+ 
+ ## ALL FILES
+ 
+@@ -102,8 +102,9 @@
+ 
+ install:
+ 	make files
+-	$(COPY) notation $(BINDIR)
+-	$(COPY) chesssymb.tex $(LIBTEX)
++	-mkdir $(BINDIR) $(LIBDIR) $(LIBTEX)
++	$(COPY) chessprn $(BINDIR)
++	$(COPY) chesssym.tex $(LIBTEX)
+ 	$(COPY) notation.tex $(LIBTEX)
+ 	$(COPY) notation.hlp $(LIBDIR)
+ 	$(COPY) notation.doc $(LIBDIR)
+diff -u -r chessprn/movedo.c chessprn.new/movedo.c
+--- chessprn/movedo.c	Tue Apr  6 07:48:53 1993
++++ chessprn.new/movedo.c	Mon Aug  9 10:51:37 1999
+@@ -46,8 +46,7 @@
+ 
+   tmp = (game *) malloc (sizeof(game));
+   ALLOCP(tmp);
+-  for (i=0; i < ((sizeof (game))/ sizeof (int)) ; i++)
+-    ((int *) tmp)[i] = 0;
++  memset(tmp, '\0', sizeof(game));
+   return(tmp);
+ }
+ 
+@@ -107,8 +106,7 @@
+ 
+   tmp = (depl *) malloc (sizeof(depl));
+   ALLOCP(tmp);
+-  for (i=0; i < ((sizeof (depl))/ sizeof (int)) ; i++)
+-    ((int *) tmp)[i] = 0;
++  memset(tmp, '\0', sizeof(depl));
+   tmp->uid = ++counter;
+   tmp->whiteturn = FALSE;
+   tmp->move = 0;
+@@ -203,11 +201,15 @@
+      depl * d;
+ #endif
+ {
+-  depl *temp;
+-  for(;d!=NULL;temp=d,d=d->next,free(temp))
+-       if(d->sub!=NULL)
+-          free_move_list(d->sub);
+-
++  if (d != MULL)
++  {
++    if (d->sub != MULL)
++      free_move_list(d->sub);
++    d->sub = MULL;
++    if (d->next != MULL)
++      free_move_list(d->next);
++    d->next = MULL;
++  }
+ }
+ 
+ /* procedure update board g with move m */
+diff -u -r chessprn/notation.c chessprn.new/notation.c
+--- chessprn/notation.c	Tue Apr  6 07:48:59 1993
++++ chessprn.new/notation.c	Mon Aug  9 10:51:37 1999
+@@ -1,6 +1,6 @@
+ /*
+   ChessPrn program
+-  @(#)notation.c 1.0 Dated 3/93
++  @(#)notation.c 1.0.1 Dated 8/99
+   Copyright (C) 1993  Ed Maillet
+   Modified and based on Notation 4.7 by Henry Thomas
+  */
+@@ -45,7 +45,7 @@
+ extern void close_files();
+ 
+ char * version_string =
+-  "@(#)ChessPrn 1.0 Dated 3/93\n";
++  "@(#)ChessPrn 1.0.1 Dated 8/99\n";
+ 
+ 
+ static char * keywords[]= {
+@@ -783,11 +783,6 @@
+     in_language = find_keyword (t_language, NBLANGUAGES, in_language,
+ 			       text,TRUE);
+     associe_traduction( &in_table, in_language);
+-    break;
+-  case SPECIAL: /* all input, up to \n is copied to output */
+-    while ((( c = getc(infile)) != EOF) && (c != '\n'))
+-      (void) putc (c,dr->outfile);
+-    putc ('\n', dr->outfile);
+     break;
+   case KNULL:
+     break;
+diff -u -r chessprn/notation.hlp chessprn.new/notation.hlp
+--- chessprn/notation.hlp	Tue Apr  6 07:49:12 1993
++++ chessprn.new/notation.hlp	Mon Aug  9 10:51:37 1999
+@@ -20,4 +20,3 @@
+ -v		: shows version number
+ -n		: suppress final board display
+ -column 	: output moves in column form. (default is linear)
+-
+\ No newline at end of file
+diff -u -r chessprn/notation.tex chessprn.new/notation.tex
+--- chessprn/notation.tex	Tue Apr  6 07:49:23 1993
++++ chessprn.new/notation.tex	Mon Aug  9 10:51:40 1999
+@@ -15,7 +15,7 @@
+ % Redefine chess.sty to get similar layout as in Informator
+ \makeatletter
+ \gdef\@dots{\ldots}
+-\resetat
++\makeatother
+ %
+ % These macros allows a move number to be bolfaced in the main line,
+ % and typset in roman in the variations (like in Informant)
