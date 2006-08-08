@@ -21,7 +21,7 @@ Narzêdzie do drukowania rozgrywek szachowych w ró¿nych formatach.
 
 %prep
 %setup -q -n chessprn
-%patch -p1
+%patch0 -p1
 zcat %{SOURCE3} | unshar
 mv Font ChessFont.ps
 mv README README.ChessFont
