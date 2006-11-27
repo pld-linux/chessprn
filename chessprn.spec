@@ -54,6 +54,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc notation.doc symboles.txt readme README.ChessFont Demo Table
-%attr(755,root,root) %{_libdir}/chessprn
+%attr(755,root,root) %{_bindir}/chessprn
 %{_prefix}/lib/games/chessprn
 /usr/share/texmf/tex/latex/chessprn
