@@ -11,6 +11,8 @@ Source2:	Cheq.ps
 Source3:	http://kamp.pl/~havner/ChessFont.sh.gz
 # Source3-md5:	8a694f8059c0270f2a57cdbca1e7ef8a
 Patch0:		%{name}.diff
+BuildRequires:	flex
+BuildRequires:	sharutils
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
