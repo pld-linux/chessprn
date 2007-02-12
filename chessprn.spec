@@ -1,5 +1,5 @@
 Summary:	Utility to print chess games in various formats
-Summary(pl.UTF-8):   Narzędzie do drukowania rozgrywek szachowych w różnych formatach
+Summary(pl.UTF-8):	Narzędzie do drukowania rozgrywek szachowych w różnych formatach
 Name:		chessprn
 Version:	1.0.1
 Release:	1
