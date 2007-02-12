@@ -1,5 +1,5 @@
 Summary:	Utility to print chess games in various formats
-Summary(pl):	Narzêdzie do drukowania rozgrywek szachowych w ró¿nych formatach
+Summary(pl.UTF-8):   NarzÄ™dzie do drukowania rozgrywek szachowych w rÃ³Å¼nych formatach
 Name:		chessprn
 Version:	1.0.1
 Release:	1
@@ -18,8 +18,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 Utility to print chess games in various formats.
 
-%description -l pl
-Narzêdzie do drukowania rozgrywek szachowych w ró¿nych formatach.
+%description -l pl.UTF-8
+NarzÄ™dzie do drukowania rozgrywek szachowych w rÃ³Å¼nych formatach.
 
 %prep
 %setup -q -n chessprn
